@@ -181,7 +181,7 @@ class PromptLearner(nn.Module):
                 embedding_list.append(embedding)
                 
         self.ctx_list = nn.ParameterList(ctx_list)
-        self.att_ctx_list = nn.ParameterList(att_ctx_list)
+        self.att_ctx_list = nn.ModuleList(att_ctx_list)
 
         print(f'Initial context: "{prompt_prefix}"')
         print(f"Number of context words (tokens): {n_ctx}")
@@ -465,9 +465,9 @@ class AttributeCompute(TrainerX):
                 output = model(image)
                 loss = F.cross_entropy(output, label)
             optimizer.zero_grad()
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+            self.scaler.scale(loss).backward()
+            self.scaler.step(optimizer)
+            self.scaler.update()
         else:
             output = model(image)
             loss = F.cross_entropy(output, label)
@@ -483,9 +483,9 @@ class AttributeCompute(TrainerX):
                 output = model(image)
                 loss = F.cross_entropy(output, label)
             optimizer.zero_grad()
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+            self.scaler.scale(loss).backward()
+            self.scaler.step(optimizer)
+            self.scaler.update()
         else:
             output = model(image)
             loss = F.cross_entropy(output, label)
@@ -500,7 +500,7 @@ class AttributeCompute(TrainerX):
         model = self.model
         
         image_train, label_train = self.parse_batch_train(batch_train)
-        image_val, label_val = self.parse_batch_train(batch_val)
+        image_val, label_val = self.parse_batch_val(batch_val)
         
         prec = self.cfg.TRAINER.COOP.PREC
         optim_prompt = self.optim
