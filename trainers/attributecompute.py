@@ -121,6 +121,13 @@ class PromptLearner(nn.Module):
         att_list = [att1_text, att2_text, att3_text, att4_text, att5_text]
         print(f"att list is {att_list}")
         
+        # 过滤掉空的属性
+        att_list = [att for att in att_list if att and att.strip()]
+        print(f"filtered att list is {att_list}")
+        
+        if len(att_list) == 0:
+            raise ValueError("All attribute texts are empty! Please check your configuration.")
+        
         prompt_prefix = " ".join(["X"] * n_ctx)
 
         classnames = [name.replace("_", " ") for name in classnames]
@@ -128,7 +135,7 @@ class PromptLearner(nn.Module):
 
         self.all_combinations = []
         for r in range(1, len(att_list) + 1):
-            if r>2:
+            if r >= 1:  # 改为生成所有组合，包括单个属性
                 combos = combinations(att_list, r)
                 self.all_combinations.extend(combos)
         random.shuffle(self.all_combinations)
