@@ -203,8 +203,11 @@ class PromptLearner(nn.Module):
         self.class_token_position = cfg.TRAINER.COOP.CLASS_TOKEN_POSITION
 
         # check length
+        print(f"[DEBUG] Final lengths - combinations: {len(self.all_combinations)}, ctx_list: {len(self.ctx_list)}, att_ctx_list: {len(self.att_ctx_list)}")
         assert len(self.all_combinations) == len(self.tokenized_prompt_list)
         assert len(self.tokenized_prompt_list) == len(self.embedding_lists)
+        assert len(self.all_combinations) == len(self.ctx_list), f"Mismatch: combinations {len(self.all_combinations)} vs ctx_list {len(self.ctx_list)}"
+        assert len(self.all_combinations) == len(self.att_ctx_list), f"Mismatch: combinations {len(self.all_combinations)} vs att_ctx_list {len(self.att_ctx_list)}"
         
     def forward(self):
         
@@ -214,10 +217,23 @@ class PromptLearner(nn.Module):
         n_att = self.n_att
         n_ctx = self.n_ctx
         
+        # 添加调试信息和安全检查
+        print(f"[DEBUG] ctx_list length: {len(ctx_list)}")
+        print(f"[DEBUG] att_ctx_list length: {len(att_ctx_list)}")
+        print(f"[DEBUG] embedding_list length: {len(embedding_list)}")
+        
+        if len(ctx_list) == 0 or len(att_ctx_list) == 0:
+            raise ValueError(f"Empty parameter lists detected! ctx_list: {len(ctx_list)}, att_ctx_list: {len(att_ctx_list)}")
+        
         prompts_list = []
         
         if self.class_token_position == "end":
             for idx in range(len(embedding_list)):
+                if idx >= len(ctx_list):
+                    raise IndexError(f"ctx_list index {idx} out of range (length: {len(ctx_list)})")
+                if idx >= len(att_ctx_list):
+                    raise IndexError(f"att_ctx_list index {idx} out of range (length: {len(att_ctx_list)})")
+                
                 embedding = embedding_list[idx].cuda()
                 ctx = ctx_list[idx].cuda()
                 if ctx.dim() == 2:
