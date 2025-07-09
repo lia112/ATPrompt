@@ -97,7 +97,7 @@ else
 fi
         DIR=output/${DATASET}/${TRAINER}/${CFG}_${SHOTS}shots/nctx${NCTX}_csc${CSC}_ctp${CTP}/search_attribute
 
-        CUDA_VISIBLE_DEVICES=0 python train_select_attribute.py \
+        CUDA_VISIBLE_DEVICES=0 python3 train_select_attribute.py \
                 --root ${DATA} \
                 --seed ${SEED} \
                 --trainer ${TRAINER} \
